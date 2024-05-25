@@ -1,0 +1,68 @@
+package com.example.demo;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.*;
+
+
+
+@RestController
+@RequestMapping
+public class AverageCalculator {
+
+    private static final int WINDOW_SIZE = 10;
+
+    private List<Integer> numbers = new ArrayList<>();
+
+    @GetMapping("/numbers/{numberid}")
+    public ResponseEntity<Map<String, Object>> getNumbers(@PathVariable char numberid) {
+        List<Integer> fetchNumbers = fetchNumbersFromTestServer(numberid);
+        store(fetchNumbers);
+        double average = calculateAverage();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("numbers", fetchNumbers);
+        response.put("windowPrevState", numbers.subList(0, Math.min(numbers.size(), WINDOW_SIZE)));
+        response.put("windowCurrState", numbers.subList(0, Math.min(numbers.size(), WINDOW_SIZE)));
+        response.put("avg", average);
+
+        return ResponseEntity.ok(response);
+    }
+
+    private List<Integer> fetchNumbersFromTestServer(char numberid) {
+        // Implement logic to fetch numbers from the test server based on the numberid
+        // This can involve making HTTP requests to the test server
+        // For demonstration purposes, we'll just return a dummy list
+        List<Integer> fetchNumbers = new ArrayList<>();
+        fetchNumbers.add(2);
+        fetchNumbers.add(3);
+        fetchNumbers.add(5);
+        return fetchNumbers;
+    }
+
+    private void store(List<Integer> fetchNumbers) {
+        for (int num : fetchNumbers) {
+            if (!numbers.contains(num)) {
+                numbers.add(num);
+            }
+        }
+        while (numbers.size() > WINDOW_SIZE) {
+            numbers.remove(0);
+        }
+    }
+
+    private double calculateAverage() {
+        if (numbers.isEmpty()) {
+            return 0;
+        }
+        int sum = 0;
+        for (int num : numbers) {
+            sum += num;
+        }
+        return (double) sum / numbers.size();
+    }
+}
